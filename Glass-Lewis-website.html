@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+
+
+<html>
+    <meta charset="utf-8">
+<script src="http://d3js.org/d3.v3.min.js"></script>
+
+<style type="text/css" media="screen">
+circle {
+    stroke: white;
+}
+text {
+    font-size: 0.9em;
+    font-family: 'Helvetica';
+}
+.label {
+    font-size: 1em;
+}
+.title {
+    font-size: 2em;
+}
+line, path {
+    stroke: #000;
+    fill: none;
+    shape-rendering: crispEdges;
+}
+</style>
+
+<body>
+
+<script type="text/javascript" charset="utf-8">
+var outerWidth = 800,
+    outerHeight = 600;
+var margin = {"left": 70, "right": 70, "top": 100, "bottom": 90};
+var innerWidth  = outerWidth - margin.left - margin.right;
+var innerHeight = outerHeight - margin.top - margin.bottom;
+var xColumn = "sepal_length",
+    yColumn = "petal_width",
+    rColumn = "sepal_length",
+    colorColumn = "species";
+var minRadius = 5,
+    maxRadius = 15;
+var xScale = d3.scale.linear().range([0, innerWidth]);
+var yScale = d3.scale.linear().range([innerHeight, 0]);
+var rScale = d3.scale.linear().range([minRadius, maxRadius]);
+var colorScale = d3.scale.category10();
+var colorScale = d3.scale.ordinal()
+    .range(["indianred", "steelblue", "seagreen"])
+    .domain(["setosa", "versicolor", "virginica"]);
+var svg = d3.select("body").append("svg")
+    .attr("width", outerWidth)
+    .attr("height", outerHeight);
+var g = svg.append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+// Axes group
+var xAxisG = g.append("g")
+    .attr("transform", "translate(0," + innerHeight + ")");
+var title = g.append("text")
+    .style("text-anchor", "middle")
+    .attr("transform", "translate(" + (innerWidth / 2) + "," + (-0.5*margin.top) + ")")
+    .attr("class", "title")
+    .text("Iris dataset");
+var xAxisLabel = xAxisG.append("text")
+    .style("text-anchor", "middle")
+    .attr("transform", "translate(" + (innerWidth / 2) + "," + (0.5*margin.bottom) + ")")
+    .attr("class", "label")
+    .text(xColumn + " (cm)");
+var yAxisG = g.append("g");
+var yAxisLabel = yAxisG.append("text")
+    .style("text-anchor", "end")
+    .attr("transform", "rotate(-90)")
+    .attr("dy", "-3em")
+    .attr("dx", "-8em")
+    .attr("class", "label")
+    .text(yColumn + " (cm)");
+// Axes
+var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+var yAxis = d3.svg.axis().scale(yScale).orient("left");
+function scatterPlot(data) {
+    xScale.domain(d3.extent(data, function(d) { return d[xColumn]; }));
+    yScale.domain([0, d3.max(data, function(d) { return d[yColumn]; })]);
+    rScale.domain(d3.extent(data, function(d) { return d[rColumn]; }));
+    xAxisG.call(xAxis);
+    console.log("HELLO");
+    yAxisG.call(yAxis);
+    // Bind
+    var circles = g.selectAll("circle").data(data);
+    // Enter
+    circles.enter().append("circle");
+    // Update
+    circles
+        .attr("r",    function(d) { return rScale(d[rColumn]); })
+        .attr("cx",   function(d) { return xScale(d[xColumn]); })
+        .attr("cy",   function(d) { return yScale(d[yColumn]); })
+        .attr("fill", function(d) { return colorScale(d[colorColumn]); });
+    // Exit
+    circles.exit().remove();
+}
+function type(d) {
+    d.sepal_width  = +d.sepal_width;
+    d.sepal_length = +d.sepal_length;
+    d.petal_width  = +d.petal_width;
+    d.petal_length = +d.petal_length;
+    return d;
+}
+d3.csv("iris.csv", type, scatterPlot);
+</script>
+    
+</body>
+</html>
